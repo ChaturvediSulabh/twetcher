@@ -1,29 +1,26 @@
 require 'twitter'
-# require 'yaml'
 require 'pry'
+require 'json'
 
 class Twetcher
   
   attr_accessor(:client, :tags, :count)
+ 
+  def initialize(tags, count)
+    @tags, @count = tags, count
+  end
 
   private
   def set_twitter_client
     client = Twitter::REST::Client.new do |config|
-      
-      file = open("private/secrets", "r")
-      file.each do |line|
-        line = line.split("=")
-        if line[0].strip === "config.consumer_key"
-          config.consumer_key = line[1].strip
-        elsif line[0].strip == "config.consumer_secret"
-          config.consumer_secret = line[1].strip
-        elsif line[0].strip == "config.access_token"
-          config.access_token = line[1].strip
-        elsif line[0].strip == "config.access_token_secret"
-          config.access_token_secret = line[1].strip
-        end
+      if File.file?("./private/secrets.json")
+        file = File.read("./private/secrets.json")
+        auth_hash = JSON.parse(file)
+        config.consumer_key = auth_hash["config.consumer_key"].to_s
+        config.consumer_secret = auth_hash["config.consumer_secret"].to_s
+        config.access_token = auth_hash["config.access_token"].to_s
+        config.access_token_secret = auth_hash["config.access_token_secret"].to_s
       end
-      file.close()
     end
     return client
   end
@@ -31,7 +28,7 @@ class Twetcher
   public
   def tw_search
     client = set_twitter_client
-    tags.each do |tag|
+    @tags.each do |tag|
       # binding.pry
       tweets = client.search(tag, result_type: "recent").take(@count)
       puts "[#{tag}]"
@@ -42,8 +39,5 @@ class Twetcher
   end
 end
 
-# Get me latest 5 Kubernetes tweets
-my_search = Twetcher.new
-my_search.tags = ["kubernetes", "AWS", "DevOps", "CICD"]
-my_search.count = 3
+my_search = Twetcher.new(["kubernetes", "AWS", "DevOps", "cicd"], 3)
 my_search.tw_search
