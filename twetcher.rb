@@ -16,10 +16,10 @@ class Twetcher
       if File.file?("./private/secrets.json")
         file = File.read("./private/secrets.json")
         auth_hash = JSON.parse(file)
-        config.consumer_key = auth_hash["config.consumer_key"].to_s
-        config.consumer_secret = auth_hash["config.consumer_secret"].to_s
-        config.access_token = auth_hash["config.access_token"].to_s
-        config.access_token_secret = auth_hash["config.access_token_secret"].to_s
+        config.consumer_key = auth_hash["config.consumer_key"]
+        config.consumer_secret = auth_hash["config.consumer_secret"]
+        config.access_token = auth_hash["config.access_token"]
+        config.access_token_secret = auth_hash["config.access_token_secret"]
       end
     end
     return client
