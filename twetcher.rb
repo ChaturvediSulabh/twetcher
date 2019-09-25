@@ -6,6 +6,18 @@ class Twetcher
   
   attr_accessor(:client, :tags, :count)
  
+  def tw_search
+    client = set_twitter_client
+    @tags.each do |tag|
+      # binding.pry
+      tweets = client.search(tag, result_type: "recent").take(@count)
+      puts "[#{tag}]"
+      tweets.collect do |tweet|
+        puts "\t#{tweet.user.screen_name}: #{tweet.text}"
+      end
+    end
+  end
+
   def initialize(tags, count)
     @tags, @count = tags, count
   end
@@ -23,19 +35,6 @@ class Twetcher
       end
     end
     return client
-  end
-
-  public
-  def tw_search
-    client = set_twitter_client
-    @tags.each do |tag|
-      # binding.pry
-      tweets = client.search(tag, result_type: "recent").take(@count)
-      puts "[#{tag}]"
-      tweets.collect do |tweet|
-        puts "\t#{tweet.user.screen_name}: #{tweet.text}"
-      end
-    end
   end
 end
 
