@@ -1,42 +1,49 @@
 require 'twitter'
-require 'yaml'
+# require 'yaml'
+require 'pry'
 
-client = Twitter::REST::Client.new do |config|
+class Twetcher
+  
+  attr_accessor(:client, :tags, :count)
 
-  file = open("private/secrets", "r")
-
-  file.each do |line|
-
-    line = line.split("=")
-    puts "#{line[0]}: #{line[1]}"
-
-    if line[0].strip === "config.consumer_key"
-      puts "hello 1"
-      config.consumer_key = line[1].strip
-    elsif line[0].strip == "config.consumer_secret"
-      puts "hello 2"
-      config.consumer_secret = line[1].strip
-    elsif line[0].strip == "config.access_token"
-      puts "hello 3"
-      config.access_token = line[1].strip
-    elsif line[0].strip == "config.access_token_secret"
-      puts "hello 4"
-      config.access_token_secret = line[1].strip
+  private
+  def set_twitter_client
+    client = Twitter::REST::Client.new do |config|
+      
+      file = open("private/secrets", "r")
+      file.each do |line|
+        line = line.split("=")
+        if line[0].strip === "config.consumer_key"
+          config.consumer_key = line[1].strip
+        elsif line[0].strip == "config.consumer_secret"
+          config.consumer_secret = line[1].strip
+        elsif line[0].strip == "config.access_token"
+          config.access_token = line[1].strip
+        elsif line[0].strip == "config.access_token_secret"
+          config.access_token_secret = line[1].strip
+        end
+      end
+      file.close()
     end
-
+    return client
   end
 
-  file.close()
-
-end
-
-def tw_search(client, tag, limit)
-  tweets = client.search('Kubernetes', result_type: "recent").take(10)
-  tweets.collect do |tweet|
-    puts "[#{tag}]: #{tweet.user.screen_name}: #{tweet.text}"
+  public
+  def tw_search
+    client = set_twitter_client
+    tags.each do |tag|
+      # binding.pry
+      tweets = client.search(tag, result_type: "recent").take(@count)
+      puts "[#{tag}]"
+      tweets.collect do |tweet|
+        puts "\t#{tweet.user.screen_name}: #{tweet.text}"
+      end
+    end
   end
 end
 
-tw_search(client, "AWS", 3)
-tw_search(client, "DevOps", 3)
-tw_search(client, "Kubernetes", 3)
+# Get me latest 5 Kubernetes tweets
+my_search = Twetcher.new
+my_search.tags = ["kubernetes", "AWS", "DevOps", "CICD"]
+my_search.count = 3
+my_search.tw_search
