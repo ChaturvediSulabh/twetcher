@@ -1,6 +1,7 @@
 require 'twitter'
 require 'pry'
 require 'json'
+require 'yaml'
 
 class Twetcher
   
@@ -9,12 +10,13 @@ class Twetcher
   def tw_search
     client = set_twitter_client
     @tags.each do |tag|
-      # binding.pry
-      tweets = client.search(tag, result_type: "recent").take(@count)
       puts "[#{tag}]"
-      tweets.collect do |tweet|
-        puts "\t#{tweet.user.screen_name}: #{tweet.text}"
+      tag = "#"+tag+" -rt"
+      tweets = client.search(tag, result_type: "recent").take(@count)
+      tweets.each do |tweet|
+       puts "\t#{tweet.full_text}" 
       end
+       File.write('tweets.yml', YAML.dump(tweets))
     end
   end
 
