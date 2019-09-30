@@ -4,7 +4,7 @@ require 'yaml'
 
 class Twetcher
   
-  attr_accessor(:client)
+  attr_writer :client
  
   def tw_search(tags, count)
     tags.each do |tag|
