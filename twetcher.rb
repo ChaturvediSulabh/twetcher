@@ -2,22 +2,9 @@ require 'twitter'
 require 'json'
 require 'yaml'
 
-class Twetcher
-  
+class TwClient
   attr_writer :client
- 
-  def tw_search(tags, count)
-    tags.each do |tag|
-      puts "[#{tag}]"
-      tag = "#"+tag+" -rt"
-      tweets = @client.search(tag, result_type: "recent").take(count)
-      tweets.each do |tweet|
-       puts "\t#{tweet.full_text}" 
-      end
-       File.write('tweets.yml', YAML.dump(tweets))
-    end
-  end
-  
+
   private
   def initialize
     @client = Twitter::REST::Client.new do |config|
@@ -34,5 +21,19 @@ class Twetcher
   end
 end
 
-my_search = Twetcher.new
+class TwSearch < TwClient
+  def tw_search(tags, count)
+    tags.each do |tag|
+      puts "[#{tag}]"
+      tag = "#"+tag+" -rt"
+      tweets = @client.search(tag, result_type: "recent").take(count)
+      tweets.each do |tweet|
+       puts "\t#{tweet.full_text}" 
+      end
+       File.write('tweets.yml', YAML.dump(tweets))
+    end
+  end
+end
+
+my_search = TwSearch.new
 my_search.tw_search(["kubernetes", "AWS", "DevOps", "cicd"], 3)
